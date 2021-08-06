@@ -1,10 +1,11 @@
-pub enum Operation {
-    Return,
-    Constant(f64),
-}
-
 #[derive(Debug)]
 pub enum OpCode {
+    Offset(usize),
     OpReturn,
-    OpConstant(usize),
+    OpConstant,
+    OpNegative,
+    OpAddition,
+    OpSubtraction,
+    OpMultiplication,
+    OpDivision,
 }

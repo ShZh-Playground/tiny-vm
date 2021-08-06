@@ -1,14 +1,16 @@
 mod chunk;
 mod opcode;
 mod vm;
+mod error;
 
-use opcode::Operation;
+use opcode::OpCode;
 use vm::VM;
 
 fn main() {
     let mut chunks = chunk::Chunk::new();
-    chunks.add_instruction(123, Operation::Constant(64_f64));
-    chunks.add_instruction(123, Operation::Return);
+    chunks.write_byte(123, OpCode::OpConstant);
+    chunks.write_constant(123, 64_f64);
+    chunks.write_byte(123, OpCode::OpReturn);
 
     let mut vm = VM::new(chunks);
     vm.run();

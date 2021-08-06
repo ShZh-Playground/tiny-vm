@@ -1,51 +1,46 @@
-use crate::opcode::{OpCode, Operation};
+use crate::opcode::OpCode;
 use std::fmt;
 
 pub struct Chunk {
-    pub code: Vec<(usize, OpCode)>,
+    // Each element stand for one bytecode
+    // Since constants are too large to store
+    // We only store offset here, the number is in constants pool
+    pub code: Vec<OpCode>,
+    pub lines: Vec<usize>,
+    // TODO: the byte range limit the size of the constants pool
     pub constants_pool: Vec<f64>,
-}
-
-// The last line may be None if the current line is the first line
-// Return '|' if the last line and cur line are the same
-fn get_line_char(last_line: Option<usize>, cur_line: usize) -> String {
-    if let Some(last_line) = last_line {
-        if cur_line == last_line {
-            String::from("   |")
-        } else {
-            format!("{:>4}", cur_line)
-        }
-    } else {
-        format!("{:>4}", cur_line)
-    }
 }
 
 impl fmt::Display for Chunk {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "== test chunk ==")?;
         let mut offset = 0;
-        let mut last_line: Option<usize> = None;
-        for (line, instruction) in self.code.iter() {
-            let line_char = get_line_char(last_line, *line);
+        while offset < self.code.len() {
+            // The last line may be None if the current line is the first line
+            // Return '|' if the last line and cur line are the same
+            let line_char = if offset == 0 || self.lines[offset] != self.lines[offset - 1] {
+                format!("{:>4}", self.lines[offset])
+            } else {
+                String::from("   |")
+            };
 
-            // Print instruction and
-            // update bytecode offset
-            match instruction {
-                OpCode::OpReturn => {
-                    writeln!(f, "{:04} {} {:?}", offset, line_char, instruction)?;
-                    offset += 1;
-                }
-                OpCode::OpConstant(index) => {
-                    writeln!(
-                        f,
-                        "{:04} {} {:?} {}",
-                        offset, line_char, instruction, self.constants_pool[*index]
-                    )?;
-                    offset += 2;
+            let opcode = &self.code[offset];
+            match opcode {
+                OpCode::OpConstant => {
+                    if let OpCode::Offset(index) = &self.code[offset + 1] {
+                        let constant = self.constants_pool[*index];
+                        writeln!(f, "{:04} {} {:?} {}", offset, line_char, opcode, constant)?;
+                        offset += 2;
+                        continue;  
+                    } else {
+                        // TODO: detect error in else where
+                        return Err(fmt::Error);
+                    }
+                },
+                _ => {
+                    writeln!(f, "{:04} {} {:?}", offset, line_char, opcode)?;
                 }
             }
-
-            last_line = Some(*line);
+            offset += 1;
         }
         Ok(())
     }
@@ -55,19 +50,21 @@ impl Chunk {
     pub fn new() -> Self {
         Self {
             code: Vec::new(),
+            lines: Vec::new(),
             constants_pool: Vec::new(),
         }
     }
 
-    pub fn add_instruction(&mut self, line: usize, operation: Operation) {
-        match operation {
-            Operation::Return => self.code.push((line, OpCode::OpReturn)),
-            Operation::Constant(constant) => {
-                self.constants_pool.push(constant);
-                // Add instruction and index in constants pool
-                let index = self.constants_pool.len() - 1;
-                self.code.push((line, OpCode::OpConstant(index)));
-            }
-        }
+    pub fn write_byte(&mut self, line: usize, operation: OpCode) {
+        self.lines.push(line);
+        self.code.push(operation);
+    }
+
+    pub fn write_constant(&mut self, line: usize, constant: f64) {
+        self.lines.push(line);
+        // Push constant and store index in bytecodes
+        self.constants_pool.push(constant);
+        let index = self.constants_pool.len() - 1;
+        self.code.push(OpCode::Offset(index));
     }
 }
