@@ -30,12 +30,12 @@ impl fmt::Display for Chunk {
                         let constant = self.constants_pool[*index];
                         writeln!(f, "{:04} {} {:?} {}", offset, line_char, opcode, constant)?;
                         offset += 2;
-                        continue;  
+                        continue;
                     } else {
                         // TODO: detect error in else where
                         return Err(fmt::Error);
                     }
-                },
+                }
                 _ => {
                     writeln!(f, "{:04} {} {:?}", offset, line_char, opcode)?;
                 }

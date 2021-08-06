@@ -1,7 +1,7 @@
 mod chunk;
+mod error;
 mod opcode;
 mod vm;
-mod error;
 
 use opcode::OpCode;
 use vm::VM;
