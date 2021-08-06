@@ -11,7 +11,7 @@ fn binary_operation(lvalue: f64, op: &OpCode, rvalue: f64) -> Option<f64> {
     match op {
         OpCode::OpAddition => Some(lvalue + rvalue),
         OpCode::OpSubtraction => Some(lvalue - rvalue),
-        OpCode::OpMultiplication => Some(lvalue - rvalue),
+        OpCode::OpMultiplication => Some(lvalue * rvalue),
         OpCode::OpDivision => Some(lvalue / rvalue),
         _ => None
     }
