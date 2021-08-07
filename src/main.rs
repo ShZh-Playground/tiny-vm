@@ -1,10 +1,7 @@
-mod chunk;
-mod error;
-mod opcode;
 mod vm;
+mod error;
 
-use opcode::OpCode;
-use vm::VM;
+use vm::{VM, chunk, opcode::OpCode};
 
 fn main() {
     let mut chunks = chunk::Chunk::new();

@@ -1,6 +1,9 @@
-use crate::chunk::Chunk;
-use crate::error::ExitStatus;
-use crate::opcode::OpCode;
+pub mod chunk;
+pub mod opcode;
+
+use super::error::ExitStatus;
+use chunk::Chunk;
+use opcode::OpCode;
 
 pub struct VM {
     chunk: Chunk,

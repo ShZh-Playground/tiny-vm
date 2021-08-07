@@ -1,4 +1,4 @@
-use crate::opcode::OpCode;
+use super::opcode::OpCode;
 use std::fmt;
 
 pub struct Chunk {
